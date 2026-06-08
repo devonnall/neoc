@@ -1,0 +1,19 @@
+x: int = 5
+x2: float = 12.2
+y: double = 35.95
+
+mystr: string = "Hello, world"
+mybool: bool = true
+mynull: string = null
+
+myarr: int[] = [1...5] # or [1,2,3,4,5]
+mydoublearr: double[] = [0...10,0.1] # specify step
+
+for i in [1...5] do
+    print(i)
+end
+
+for ch in mystr do
+    ch += 1
+    print("mystr[i] = {ch}")
+end
