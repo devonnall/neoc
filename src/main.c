@@ -1,82 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "token.h"
+#include "fileio.h"
+#include "scanner.h"
 
-extern FILE *yyin;
-extern int yylex();
-extern char *yytext;
-
-int current_line = 1;
-int current_column = 1;
-
-void update_lc() {
-    for (int i = 0; yytext[i] != '\0'; i++) {
-        if (yytext[i] == '\n') {
-            current_line++;
-            current_column = 1;
-        } else {
-            current_column++;
-        }
-    }
-}
-
-Token * make_token(token_t type) {
-    // Token token = {
-    //     .type = type,
-    //     .text = yytext,
-    //     .line = current_line
-    // };
-
-    Token *token = (Token*)malloc(sizeof(Token));
-    token->type = type;
-    token->text = yytext;
-    token->line = current_line;
-    return token;
-}
-
-void TokenList_append(TokenList *tokens, Token *token) {
-    if (tokens->length >= tokens->capacity) {
-        tokens->tokens = (Token*)realloc(tokens->tokens, tokens->capacity * 2);
-    }
-    tokens->tokens[tokens->length++] = *token;
-}
+const char *dyfile = NULL;
+bool errors = false;
 
 int main(int argc, char **argv) {
-    yyin = fopen(argv[1], "r");
-    if (!yyin) {
-        printf("error: failed to open \"%s\"\n", argv[1]);
-        return 1;
-    }
-
-    fseek(yyin, 0, SEEK_END);
-    long length = ftell(yyin);
-    fseek(yyin, 0, SEEK_SET);
-
-    int estimate = length / 3;
-
-    TokenList tokens = {
-        .tokens = malloc(estimate * sizeof(Token)),
-        .length = 0,
-        .capacity = estimate
-    };
-
-    while (1) {
-        token_t token_type = yylex();
-        if (token_type == TOKEN_ERROR) {
-            printf("error: line %d, column %d\n%s", current_line, current_column, yytext);
-            return 1;
-        } else if (token_type == TOKEN_EOF) {
-            break;
+        if (argc < 2) {
+                printf("usage: %s <file>\n", argv[0]);
+                return 1;
         }
-        // printf("%s ", yytext);
-        Token *token = make_token(token_type);
-        // printf("%s\n", token.text);
-        TokenList_append(&tokens, token);
-    }
-    for (int i = 0; i < tokens.length; i++) {
-        printf("%s ", tokens.tokens[i].text);
-    }
-    printf("\n");
-    return 0;
-}
 
+        dyfile = argv[1];
+        const char *source = NULL;
+        struct dytext text = {0};
+
+        if (read_file(dyfile, &source) != 0) {
+                printf("error: failed to read file\n");
+                return 1;
+        }
+
+        struct scanner dy_scanner = {
+                .source = source,
+                .cursor = 0,
+                .line = 1,
+                .column = 1
+        };
+
+        for (;;) {
+                enum token_type type = get_token(&dy_scanner, &text);
+                if (type == TOKEN_EOF) break;
+                if (type == TOKEN_SKIP) continue;
+                printf("%u: %s\n", type, text.text);
+        }
+
+        return 0;
+}
