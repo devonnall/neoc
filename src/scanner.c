@@ -38,6 +38,10 @@ int match(const char *s1, const char *s2, size_t n) {
         return 0;
 }
 
+char peek(struct scanner *dyscanner) {
+        return dyscanner->source[dyscanner->cursor+1];
+}
+
 void advance(struct scanner *dyscanner, size_t n) {
         for (size_t i = 0; i < n; i++) {
                 dyscanner->cursor++;
@@ -120,7 +124,6 @@ void handle_number(struct scanner *dyscanner, struct dytext *text,
 int isstring(struct scanner *dyscanner, int *len) {
         advance(dyscanner, 1);
         const char *current = &dyscanner->source[dyscanner->cursor];
-        *len = 1;
 
         while (*current != '\n' && *current != '\0') {
                 if (*current == '"' && *(current - 1) != '\\') {
@@ -143,10 +146,19 @@ void handle_string(struct dytext *text, const char *start,
         *type = TOKEN_STRING_LITERAL;
 }
 
+void skip_comment(struct scanner *dyscanner) {
+        const char *start = &dyscanner->source[dyscanner->cursor];
+
+        while (*start != '\n' && *start != '\0') {
+                start++;
+                advance(dyscanner, 1);
+        }
+}
+
 enum token_type get_token(struct scanner *dyscanner, struct dytext *text) {
         const char *start = &dyscanner->source[dyscanner->cursor];
         enum token_type type;
-        int len = 0;
+        int len = 1;
         bool syntax_error = false;
 
         memset(text->text, 0, text->length);
@@ -161,6 +173,17 @@ enum token_type get_token(struct scanner *dyscanner, struct dytext *text) {
                         handle_keyword(dyscanner, text, "int", 3);
                         type = TOKEN_INT;
                         break;
+                } else if (match(start, "if", 2)) {
+                        handle_keyword(dyscanner, text, "if", 2);
+                        type = TOKEN_IF;
+                        break;
+                }
+                goto identifier;
+        case 'e':
+                if (match(start, "else", 4)) {
+                        handle_keyword(dyscanner, text, "else", 4);
+                        type = TOKEN_ELSE;
+                        break;
                 }
                 goto identifier;
         case 's':
@@ -170,6 +193,153 @@ enum token_type get_token(struct scanner *dyscanner, struct dytext *text) {
                         break;
                 }
                 goto identifier;
+        case 'f':
+                if (match(start, "fn", 2)) {
+                        handle_keyword(dyscanner, text, "fn", 2);
+                        type = TOKEN_FUNCTION;
+                        break;
+                } else if (match(start, "for", 3)) {
+                        handle_keyword(dyscanner, text, "for", 3);
+                        type = TOKEN_FOR;
+                        break;
+                }
+                goto identifier;
+        case 'r':
+                if (match(start, "return", 6)) {
+                        handle_keyword(dyscanner, text, "return", 6);
+                        type = TOKEN_RETURN;
+                        break;
+                }
+        case 'w':
+                if (match(start, "while", 5)) {
+                        handle_keyword(dyscanner, text, "while", 5);
+                        type = TOKEN_WHILE;
+                        break;
+                }
+                goto identifier;
+        case '*':
+                if (peek(dyscanner) == '=') {
+                        set_dytext(text, "*=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_DIV_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "*", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_DIV;
+                        break;
+                }
+        case '/':
+                if (peek(dyscanner) == '/') {
+                        skip_comment(dyscanner);
+                        type = TOKEN_SKIP;
+                        break;
+                } else if (peek(dyscanner) == '=') {
+                        set_dytext(text, "/=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_DIV_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "/", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_DIV;
+                        break;
+                }
+        case '+':
+                if (peek(dyscanner) == '+') {
+                        set_dytext(text, "++", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_PLUS_PLUS;
+                        break;
+                } else if (peek(dyscanner) == '=') {
+                        set_dytext(text, "+=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_PLUS_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "+", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_PLUS;
+                        break;
+                }
+        case '-':
+                if (peek(dyscanner) == '-') {
+                        set_dytext(text, "--", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_MINUS_MINUS;
+                        break;
+                } else if (peek(dyscanner) == '=') {
+                        set_dytext(text, "-=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_MINUS_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "-", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_MINUS;
+                        break;
+                }
+        case '%':
+                if (peek(dyscanner) == '=') {
+                        set_dytext(text, "%=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_MOD_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "%", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_MOD;
+                        break;
+                }
+        case '(':
+                set_dytext(text, "(", 1);
+                advance(dyscanner, 1);
+                type = TOKEN_LPAREN;
+                break;
+        case ')':
+                set_dytext(text, ")", 1);
+                advance(dyscanner, 1);
+                type = TOKEN_RPAREN;
+                break;
+        case '{':
+                set_dytext(text, "{", 1);
+                advance(dyscanner, 1);
+                type = TOKEN_LBRACE;
+                break;
+        case '}':
+                set_dytext(text, "}", 1);
+                advance(dyscanner, 1);
+                type = TOKEN_RBRACE;
+                break;
+        case '<':
+                if (peek(dyscanner) == '=') {
+                        set_dytext(text, "<=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_LESS_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, "<", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_LESS;
+                        break;
+                }
+        case '>':
+                if (peek(dyscanner) == '=') {
+                        set_dytext(text, ">=", 2);
+                        advance(dyscanner, 2);
+                        type = TOKEN_GREATER_EQUAL;
+                        break;
+                } else {
+                        set_dytext(text, ">", 1);
+                        advance(dyscanner, 1);
+                        type = TOKEN_GREATER;
+                        break;
+                }
+        case ',':
+                set_dytext(text, ",", 1);
+                advance(dyscanner, 1);
+                type = TOKEN_COMMA;
+                break;
         case '"':
                 if (isstring(dyscanner, &len)) {
                         handle_string(text, start, &type, len);
