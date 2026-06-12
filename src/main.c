@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "fileio.h"
-#include "scanner.h"
+#include "dscanner.h"
 
 const char *dyfile = NULL;
 
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    struct token_list tokens;
+    struct TokenList tokens;
 
     if (tokenize(source, &tokens) != 0) {
         printf("errors encountered during tokenization\n");
