@@ -1,0 +1,3 @@
+// Contains characters not supported by language
+// Should fail at first character
+#$&~

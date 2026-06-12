@@ -1,0 +1,13 @@
+// Standard C-like for loop
+for (i: int = 0; i < 10; i++) {
+    print(i * 5);
+}
+
+counter: int = 0;
+for (j: int = 0; j < 50; j++) {
+    if (j == 30) {
+        break;
+    } else {
+        counter += (j * 5) % 20;
+    }
+}

@@ -1,8 +1,6 @@
 #ifndef DUSTY_SCANNER_H
 #define DUSTY_SCANNER_H
 
-#include <stdbool.h>
-
 struct Scanner {
     const char *source;
     int cursor;
@@ -13,7 +11,7 @@ struct Scanner {
 enum TokenType {
     TOKEN_EOF = 0,
     TOKEN_INT, TOKEN_FLOAT, TOKEN_DOUBLE, TOKEN_CHAR, TOKEN_STRING, TOKEN_IF,
-    TOKEN_ELSE, TOKEN_FUNCTION, TOKEN_FOR, TOKEN_WHILE, TOKEN_RETURN,
+    TOKEN_ELSE, TOKEN_FUNCTION, TOKEN_FOR, TOKEN_WHILE, TOKEN_RETURN, TOKEN_BREAK,
 
     TOKEN_LPAREN, TOKEN_RPAREN, TOKEN_LBRACE, TOKEN_RBRACE, TOKEN_NOT, TOKEN_NOT_EQUAL,
     TOKEN_LESS, TOKEN_LESS_EQUAL, TOKEN_LESS_LESS, TOKEN_GREATER, TOKEN_GREATER_EQUAL,
@@ -32,8 +30,8 @@ struct Token {
     enum TokenType type;
     int start;
     int length;
-    int start_col;
-    int end_col;
+    int line;
+    int col;
     const char *lexeme;
 };
 
@@ -42,14 +40,6 @@ struct TokenList {
     int count;
     int capacity;
 };
-
-// struct Result {
-//     bool ok;
-//     union {
-//         int success;
-//         enum Error error;
-//     };
-// };
 
 int tokenize(const char *source, struct TokenList *tokens);
 

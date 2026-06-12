@@ -1,0 +1,11 @@
+number: type = int, float, double; // set alias for all potential variable types
+
+fn pow(num: [number], exp: int): [number] {
+    res: [number] = num;
+    for (i: int = 0; i < exp; i++) {
+        num *= num;
+    }
+    return num;
+}
+
+res: int = pow(25, 3);

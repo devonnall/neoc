@@ -1,0 +1,7 @@
+x: int = 32;
+y: int = 31;
+
+print(x == y);
+
+print(true && true);
+print(true || false);

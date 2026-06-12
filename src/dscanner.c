@@ -7,7 +7,7 @@
 
 static const char *token_types[] = {
     "eof", "int", "float", "double", "char", "string", "if", "else", "function", "for", "while",
-    "return", "l_paren", "r_paren", "l_brace", "r_brace", "not", "not_equal", 
+    "return", "break", "l_paren", "r_paren", "l_brace", "r_brace", "not", "not_equal", 
     "less", "less_equal", "less_less", "greater", "greater_equal", "greater_greater", "comma", 
     "mul", "mul_equal", "div", "div_equal", "plus", "plus_equal", "plus_plus", "minus", "minus_equal", 
     "minus_minus", "mod", "mod_equal", "and", "and_equal", "and_and", "or", "or_equal", "or_or", 
@@ -16,7 +16,7 @@ static const char *token_types[] = {
 };
 
 static const char *keywords[] = {
-    "int", "float", "double", "char", "string", "if", "else", "fn", "for", "while", "return"
+    "int", "float", "double", "char", "string", "if", "else", "fn", "for", "while", "return", "break"
 };
 
 static void
@@ -107,12 +107,11 @@ add_token(const char *str, struct Scanner *scanner, struct TokenList *tokens, en
         .type = type,
         .start = scanner->cursor,
         .length = n,
-        .start_col = scanner->column,
-        .end_col = scanner->column + n,
+        .line = scanner->line;
+        .col = scanner->column,
         .lexeme = strdup(str)
     };
 
-    // ARRAY_PUSH(tokens, token, struct Token);
     token_list_push(tokens, token);
     advance(scanner, n);
 }
@@ -131,12 +130,11 @@ add_custom(struct Scanner *scanner, struct TokenList *tokens, enum TokenType typ
         .type = type,
         .start = scanner->cursor,
         .length = len,
-        .start_col = scanner->column,
-        .end_col = scanner->column + len - 1,
+        .line = scanner->line;
+        .col = scanner->column,
         .lexeme = strndup(&scanner->source[scanner->cursor], len)
     };
 
-    // ARRAY_PUSH(tokens, token, struct Token);
     token_list_push(tokens, token);
 
     advance(scanner, len);
@@ -181,19 +179,6 @@ add_op(const char *op, struct Scanner *scanner, struct TokenList *tokens, enum T
 
     tmp_op[1] = '\0';
     add_token(tmp_op, scanner, tokens, op_t); 
-
-    // int repeat_offset = equals + repeat;
-    //
-    // if (repeat && (peek(scanner) == *op)) {
-    //     tmp_op[1] = *op;
-    //     add_token(tmp_op, scanner, tokens, op_t + repeat_offset); 
-    // } else if (equals && (peek(scanner) == '=')) {
-    //     tmp_op[1] = '=';
-    //     add_token(tmp_op, scanner, tokens, op_t + 1); 
-    // } else {
-    //     tmp_op[1] = '\0';
-    //     add_token(tmp_op, scanner, tokens, op_t); 
-    // }
 }
 
 static void
@@ -231,7 +216,6 @@ add_string_constant(struct Scanner *scanner, struct TokenList *tokens) {
         .lexeme = strndup(&scanner->source[scanner->cursor], len)
     };
 
-    // ARRAY_PUSH(tokens, token, struct Token);
     token_list_push(tokens, token);
 
     advance(scanner, len);
@@ -289,7 +273,6 @@ get_token(struct Scanner *scanner, struct TokenList *tokens) {
 
 static void
 print_tokens(struct TokenList *tokens) {
-    // struct Token *_tokens = (struct Token*)tokens->elements;
     for (int i = 0; i < tokens->count; i++) {
         printf("%s '%s'\n", token_types[tokens->tokens[i].type], tokens->tokens[i].lexeme);
     }
@@ -305,9 +288,7 @@ tokenize(const char *source, struct TokenList *tokens) {
     };
 
     token_list_init(tokens);
-    // ARRAY_INIT(tokens, struct Token);
 
-    // struct Token *_tokens = (struct Token*)tokens->elements;
     for (;;) {
         get_token(&scanner, tokens);
         if (tokens->count > 0 && tokens->tokens[tokens->count - 1].type == TOKEN_EOF)

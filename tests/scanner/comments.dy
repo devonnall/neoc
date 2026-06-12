@@ -1,0 +1,4 @@
+// Expected result is just an EOF token
+// Should handle multiple comments
+
+// Should also skip newlines

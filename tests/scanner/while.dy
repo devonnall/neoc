@@ -1,0 +1,8 @@
+x: int = 30;
+i: int = 25;
+while (i > 0) {
+    print(x - i);
+    if (i == 5) {
+        break;
+    }
+}
