@@ -1,16 +1,11 @@
-# Dusty
+# NeoC
 
-A(nother) C variant that aims to to improve upon C and take features from higher level languages.
+A variant of C that aims to add quality of life improvements and address some of its weird quirks.
 
 ## Overview
 
-Dusty is a statically typed C-like programming language I am designing. I have been interested in building a compiler for a long time, and
-this is my first major attempt. I could have built one for an existing language, but I thought it would be way more interesting to design
-my own.
-
-I am aiming for a low level language like C that adds quality of life improvements and easier ways to perform very common tasks.
-This probably won't be a unique language in a lot of ways, as languages like C3 and Zig already exist. Dusty will just add my personal
-twist on things. 
+NeoC is a statically typed programming language I am designing. I have been interested in building a compiler for a long time, and
+this is my first major attempt. I am aiming to just make a slightly better version of C without making it an entirely different language like C++. 
 
 Currently, the scanner is close to its final form, with minor tweaks to come. The roadmap looks like this:
 
@@ -50,6 +45,8 @@ to the console.
 
 ### Syntax
 
+Syntax is basically the same as C with some slight modifications.
+
 #### Variable Declarations
 
 Types come after the variable name:
@@ -78,6 +75,18 @@ fn say_hello(name: string) {
 }
 ```
 
+#### Pointers
+
+As of now, pointers will be declared and dereferenced with a tilde (`~`). I want to avoid ambiguity with `*`.
+
+```
+x: ~int = new int[50];
+x[0] = 1;
+print("{~x}");
+# or
+print("{x[0]}")
+```
+
 ## Planned Features
 
 ### Parser
@@ -90,7 +99,7 @@ The parser will be a handwriiten and use recursive descent. More information to 
 
 ### C Code Generator
 
-Dusty will be compiled to C.
+NeoC will be compiled to C.
 
 <More information to come soon>
 
@@ -125,6 +134,17 @@ fn pow(num: [number], exp: int): [number] {
 }
 ```
 
+#### Function Pointers
+
+Declare a function pointer:
+
+```
+fn add(a: int, b: int): int {
+  return a + b;
+}
+fp: fn(int, int): int = add;
+```
+
 #### Memory Allocation
 
 Syntax for allocating and freeing memory on the heap will hopefully be better:
@@ -147,8 +167,8 @@ fn main() {
 Clone the repository and build:
 
 ```bash
-git clone https://github.com/devonnall/dusty.git
-cd dusty && make
+git clone https://github.com/devonnall/neoc.git
+cd neoc && make
 ```
 
 Run the tests:
@@ -162,11 +182,11 @@ chmod +x ./run-scanner-tests.sh
 You can find sample dummy programs in tests/scanner. Run the scanner on a file to get a list of tokens (from project root):
 
 ```bash
-./bin/dusty path/to/source/file
+./bin/neoc path/to/source/file
 ```
 
 For example:
 
 ```bash
-./bin/dusty test.dy
+./bin/neoc test.neoc
 ```
