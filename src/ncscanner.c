@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include "dscanner.h"
+#include "ncscanner.h"
 
 static const char *token_types[] = {
     "eof", "int", "float", "double", "char", "string", "if", "else", "function", "for", "while",
@@ -11,8 +11,8 @@ static const char *token_types[] = {
     "less", "less_equal", "less_less", "greater", "greater_equal", "greater_greater", "comma", 
     "mul", "mul_equal", "div", "div_equal", "plus", "plus_equal", "plus_plus", "minus", "minus_equal", 
     "minus_minus", "mod", "mod_equal", "and", "and_equal", "and_and", "or", "or_equal", "or_or", 
-    "colon", "colon_colon", "semi", "equal", "equal_equal", 
-    "l_bracket", "r_bracket", "caret", "caret_equal", "numeric_constant", "string_constant", "identifier"
+    "colon", "colon_colon", "semi", "equal", "equal_equal", "l_bracket", "r_bracket", "caret",
+    "caret_equal", "question", "numeric_constant", "string_constant", "identifier"
 };
 
 static const char *keywords[] = {
@@ -266,6 +266,7 @@ get_token(struct Scanner *scanner, struct TokenList *tokens) {
         case ';': add_token(";", scanner, tokens, (enum TokenType)TOKEN_SEMICOLON); break;
         case '[': add_token("[", scanner, tokens, (enum TokenType)TOKEN_LBRACKET); break;
         case ']': add_token("]", scanner, tokens, (enum TokenType)TOKEN_RBRACKET); break;
+	case '?': add_token("?", scanner, tokens, (enum TokenType)TOKEN_QUESTION); break;
         case '\0': add_token("", scanner, tokens, (enum TokenType)TOKEN_EOF); break;
         case '"': add_string_constant(scanner, tokens); break;
         default: 

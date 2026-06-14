@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "fileio.h"
-#include "dscanner.h"
+#include "ncscanner.h"
 
-const char *dyfile = NULL;
+const char *ncfile = NULL;
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -11,10 +11,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    dyfile = argv[1];
+    ncfile = argv[1];
     char *source = NULL;
 
-    if (read_file(dyfile, &source) != 0) {
+    if (read_file(ncfile, &source) != 0) {
         printf("error: failed to read file\n");
         return 1;
     }
