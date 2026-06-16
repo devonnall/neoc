@@ -1,8 +1,8 @@
 CC := clang
 CFLAGS := -Wall -Wextra -Wno-misleading-indentation -I./include -fsanitize=address -fno-omit-frame-pointer -g
 
-SRCS := ./src/main.c ./src/dscanner.c ./src/fileio.c
-TARGET := ./bin/dusty
+SRCS := ./src/main.c ./src/ncscanner.c ./src/fileio.c
+TARGET := ./bin/nc
 
 $(TARGET): $(SRCS)
 	mkdir -p bin

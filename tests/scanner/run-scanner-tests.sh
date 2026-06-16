@@ -13,11 +13,11 @@ YELLOW='\e[33m'
 BLUE='\e[34m'
 NC='\e[0m'
 
-for file in *.dy; do
+for file in *.neoc; do
     if [ -f "$file" ]; then
         printf "${BLUE}Testing${NC}: $file\n"
         
-        ../../bin/dusty $file > .result-$file.tmp
+        ../../bin/nc $file > .result-$file.tmp
         res=$(rg --count-matches "error" .result-$file.tmp)
 
         if [ -n "$res" ]; then

@@ -60,11 +60,12 @@ token_list_free(struct TokenList *list) {
     for (int i = 0; i < list->count; i++) {
         free(list->tokens[i].lexeme);
     }
+    free(list->tokens);
 }
 
 static bool
 iswhitespace(char ch) {
-    if (ch == ' ' || ch == '\t' || ch == 'n' || ch == '\0')
+    if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\0')
         return true;
 
     return false;
@@ -76,6 +77,15 @@ iswordchar(char ch) {
         return true;
 
     return false;
+}
+
+static int
+get_strlen(const char *str) {
+    int len = 0;
+    for (int i = 0; !iswhitespace(str[i]); i++) {
+        len++;
+    }
+    return len;
 }
 
 static bool
@@ -158,7 +168,8 @@ add_alphanum(struct Scanner *scanner, struct TokenList *tokens) {
     }
 
     for (int i = 0; i < n; i++) {
-        if (match(str, keywords[i], strlen(keywords[i]))) {
+        int n = get_strlen(str);
+        if (match(str, keywords[i], n)) {
             char *keyword = strndup(keywords[i], strlen(keywords[i]));
             add_token(keyword, scanner, tokens, (enum TokenType)(i + 1));
             free(keyword);
@@ -266,7 +277,7 @@ get_token(struct Scanner *scanner, struct TokenList *tokens) {
         case ';': add_token(";", scanner, tokens, (enum TokenType)TOKEN_SEMICOLON); break;
         case '[': add_token("[", scanner, tokens, (enum TokenType)TOKEN_LBRACKET); break;
         case ']': add_token("]", scanner, tokens, (enum TokenType)TOKEN_RBRACKET); break;
-	case '?': add_token("?", scanner, tokens, (enum TokenType)TOKEN_QUESTION); break;
+    	case '?': add_token("?", scanner, tokens, (enum TokenType)TOKEN_QUESTION); break;
         case '\0': add_token("", scanner, tokens, (enum TokenType)TOKEN_EOF); break;
         case '"': add_string_constant(scanner, tokens); break;
         default: 
